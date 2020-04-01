@@ -16,10 +16,10 @@ args = Arg()
 
 
 def addLabelToSingleStock(code):
-    data = pd.read_csv(args.hs300path+code+'.csv')  # 读取数据
+    data = pd.read_csv(args.hs300path + code + '.csv')  # 读取数据
     data = data[['open', 'low', 'high', 'close', 'volume', 'p_change']].copy()
     m = data.shape[0]
-    data['label'] = np.zeros((m, 1))    # 初始化标签列 0
+    data['label'] = np.zeros((m, 1))  # 初始化标签列 0
 
     for i in range(m):
         p_change = data['p_change'].iloc[i]
@@ -54,3 +54,29 @@ def split_train_test(dataMax):
     Y_train = np.mat(Y_train).T
     Y_test = np.mat(Y_test).T
     return X_train, Y_train, X_test, Y_test
+
+
+"""
+获取指定股票前240个交易日的数据
+"""
+
+
+def loadDataSet(code):
+    dataMat = pd.read_csv(args.hs300path + code + '.csv')
+    data = dataMat[:241:20][['open', 'low', 'high', 'close', 'volume', 'p_change']].copy()
+    m = data.shape[0]
+    data['label'] = np.ones((m,1))
+    for i in range(m):
+        P_change_sum = sum(dataMat['p_change'][i*20:(i+1)*20])
+        if P_change_sum > 0:
+            data['label'].iloc[i] = 1
+        else:
+            data['label'].iloc[i] = -1
+    train_X = np.mat(data.iloc[:-1,:-1].values)
+    train_Y = np.mat(data.iloc[:-1,-1].values).T
+    test_X = np.mat(data.iloc[-1,:-1].values)
+    test_Y = np.mat(data.iloc[-1,-1]).T
+    return train_X, train_Y, test_X, test_Y
+
+
+

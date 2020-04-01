@@ -78,3 +78,18 @@ def download_hs300_stock_data(date1, date2, filename):
         code = "{0:06d}".format(code)
         if not os.path.exists('data/{}.csv'.format(code)):
             get_stock_data(code, date1, date2, filename)
+
+
+# ------------------------使用pandas去除重复数据------------------------ #
+def quchong(file):
+    f = open(file)
+    df = pd.read_csv(f, header=0)
+    datalist = df.drop_duplicates()
+    datalist.to_csv(file)
+
+
+# ------------------------获取股票长度----------------------- #
+# 辅助函数
+def get_data_len(file_path):
+    df = pd.read_csv(file_path)
+    return len(df)
