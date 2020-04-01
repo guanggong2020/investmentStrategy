@@ -14,3 +14,9 @@ if __name__ == '__main__':
 
     # get_hs300_code_name(args.hs300path)
     # download_hs300_stock_data(args.start,args.current,args.hs300path)
+
+
+    """
+    下载沪深300指数数据
+    """
+    get_hs300_data(args.start,args.current,args.indexpath)

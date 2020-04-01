@@ -49,7 +49,7 @@ def buildStump(xMat, yMat, D):
         Max = xMat[:, i].max()  # 找到特征中最大值
         stepSize = (Max - Min) / Steps  # 计算步长
 
-        for j in range(-1, int(Steps) + 1): # 第二层循环，遍历每个步长
+        for j in range(-1, int(Steps) + 1):  # 第二层循环，遍历每个步长
 
             for S in ['lt', 'gt']:  # 大于和小于的情况，均遍历。lt:less than，gt:greater than
                 Q = (Min + float(j) * stepSize)  # 计算阈值
@@ -57,7 +57,7 @@ def buildStump(xMat, yMat, D):
                 err = np.mat(np.ones((m, 1)))  # 初始化误差矩阵，先假设所有的结果都是错的（标记为1）
                 err[predictedVals == yMat] = 0  # 分类正确的,赋值为0
                 eca = D.T * err  # 计算误差
-                #print(f'切分特征: {i}, 阈值:{np.round(Q,2)}, 标志:{S}, 权重误差:{np.round(eca,3)}')
+                # print(f'切分特征: {i}, 阈值:{np.round(Q,2)}, 标志:{S}, 权重误差:{np.round(eca,3)}')
                 if eca < minE:  # 找到误差最小的分类方式
                     minE = eca
                     bestClas = predictedVals.copy()
