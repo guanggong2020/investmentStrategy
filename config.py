@@ -15,3 +15,4 @@ class Arg:
         self.hs300path = '../data/hs300/'
         # 指数数据存储路径
         self.indexpath = '../data/index_data/'
+

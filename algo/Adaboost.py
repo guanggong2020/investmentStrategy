@@ -45,7 +45,7 @@ def AdaboostTrainDS(xMat, yMat, maxC=40):
         errRate = aggErr.sum() / m
         # print(f"分类错误率: {errRate}")
         if errRate == 0: break  # 误差为0，退出循环
-    return weakClass
+    return weakClass,aggClass
 
 
 """
@@ -70,4 +70,4 @@ def AdaClassify(data, weakClass):
                                  weakClass[i]['标志'])
         aggClass += weakClass[i]['alpha'] * classEst
         # print(aggClass)
-    return np.sign(aggClass)
+    return np.sign(aggClass),aggClass

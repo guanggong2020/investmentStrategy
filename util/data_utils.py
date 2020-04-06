@@ -4,6 +4,8 @@ import pandas as pd
 import os
 import time
 
+pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
+
 
 # ----------------------获取当前时间------------------- #
 def getCurrentTime():
@@ -76,7 +78,7 @@ def download_hs300_stock_data(date1, date2, filename):
     df = pd.read_csv('../data/hs300/hs300.csv')['code']
     for code in df:
         code = "{0:06d}".format(code)
-        if not os.path.exists('data/{}.csv'.format(code)):
+        if not os.path.exists('../data/hs300/{}.csv'.format(code)):
             get_stock_data(code, date1, date2, filename)
 
 
@@ -93,3 +95,37 @@ def quchong(file):
 def get_data_len(file_path):
     df = pd.read_csv(file_path)
     return len(df)
+
+
+# ------------------------获取交易所交易日历数据----------------------- #
+def trade_cal_sse(start_date):
+    # exchange:交易所 SSE上交所 SZSE深交所
+    df = pro.trade_cal(exchange='SZSE', start_date='20180101', end_date='20200405')
+    df.to_csv('../data/trade_cal/trade_cal_szse.csv')
+
+
+# ------------------------获取当前所有正常上市交易的股票列表----------------------- #
+def get_stock_basic():
+    # 查询当前所有正常上市交易的股票列表
+    df = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,fullname,market,'
+                                                              'list_date')
+    # 去除ST股
+    df = df[~df.name.str.contains('ST')]
+    df.to_csv('../data/stock_basic/stock_basic.csv')
+
+
+# -----------------------------批量下载所有股票数据-----------------------------------#
+def download_all_stock():
+    pool = pd.read_csv('../data/stock_basic/stock_basic.csv')
+    print('获得上市股票总数：', len(pool) - 1)
+    j = 1
+    for code in pool.ts_code:
+        # code = "{0:06d}".format(code)
+        print('正在获取第%d家，股票代码%s.' % (j, code))
+        j += 1
+        path = '../data/stock_basic/'+code+'.csv'
+        if not os.path.exists('../data/stock_basic/'+code+'.csv'):
+            df = pro.daily(ts_code=code, start_date='20180101')
+            df.to_csv(path)
+
+
