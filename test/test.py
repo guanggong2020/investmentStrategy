@@ -38,7 +38,7 @@ from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set
 #     return day_stock
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # df = pd.read_csv('../data/stock_basic/000001.SZ.csv', index_col='trade_date')
     # # print(df.index[::20][1:14])
     # t = df.index[::20][1:2]
@@ -74,4 +74,4 @@ if __name__ == '__main__':
     # mark_stock_yield()
     # day_stock = merge_day_data('20190301')
     # print(day_stock)
-    download_time_set()
+    # download_time_set()
