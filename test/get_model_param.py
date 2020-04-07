@@ -121,3 +121,4 @@ if __name__ == '__main__':
     scores = cross_validation()
     df = pd.DataFrame({'5折交叉验证准确率': scores, '训练准确率': train_accuracy, '测试准确率': test_accuracy})
     df.to_csv('../data/accuracy/accuracy.csv')
+

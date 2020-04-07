@@ -56,4 +56,21 @@ def drawStockTrend(name, start, imageName):
     plt.close()
 
 
-drawStockTrend(u'浦发银行', '2020-02-19', u'浦发银行.png')
+# drawStockTrend(u'浦发银行', '2020-02-19', u'浦发银行.png')
+# 绘制弱分类器个数与准确率折线图
+def draw_accuracy():
+    x = range(200)
+    df = pd.read_csv('./data/accuracy/accuracy.csv')
+    y_train_accuracy = df['训练准确率']
+    y_test_accuracy = df['测试准确率']
+    y_cross_validation = df['5折交叉验证准确率']
+    plt.plot(x, y_train_accuracy, ls=':', lw=2, label='训练准确率')
+    plt.plot(x, y_test_accuracy, ls='--', lw=2, label='测试准确率')
+    plt.plot(x, y_cross_validation, ls='-', lw=2, label='5折交叉验证准确率',color="red")
+    plt.savefig('./image/accuracy.png')
+    plt.legend()
+    plt.show()
+
+
+if __name__ == '__main__':
+    draw_accuracy()
