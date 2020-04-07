@@ -20,10 +20,10 @@ def calAcc(maxC=40):
     train_X, train_Y, test_X, test_Y = split_train_test(dataMat)
 
     # 3、训练得到弱分类器信息
-    weakClass = AdaboostTrainDS(train_X, train_Y, maxC)
+    weakClass,aggClass = AdaboostTrainDS(train_X, train_Y, maxC)
 
     # 4、使用弱分类器对特征矩阵进行分类
-    predictions = AdaClassify(train_X, weakClass)
+    predictions,aggClass = AdaClassify(train_X, weakClass)
 
     # 5、计算训练集分类准确率
     m = train_X.shape[0]
@@ -37,7 +37,7 @@ def calAcc(maxC=40):
     # 6、计算测试集分类准确率
     test_re = 0
     n = test_X.shape[0]
-    predictions = AdaClassify(test_X, weakClass)
+    predictions,aggClass = AdaClassify(test_X, weakClass)
     for i in range(n):
         if predictions[i] == test_Y[i]:
             test_re += 1

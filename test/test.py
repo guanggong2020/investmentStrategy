@@ -75,3 +75,6 @@ from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set
     # day_stock = merge_day_data('20190301')
     # print(day_stock)
     # download_time_set()
+    # a = [1,2,3]
+    # import numpy as np
+    # print(np.mean(a))

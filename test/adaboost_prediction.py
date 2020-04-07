@@ -39,10 +39,10 @@ test_data = pd.read_csv('../data/day_stock_process/20190301.csv')[['ts_code', 'o
                                                                     'pre_close', 'change', 'pct_chg', 'vol',
                                                                     'amount',
                                                                     'label']]
-# 训练集特征样本
+# 测试集特征样本
 test_X = np.mat(test_data.iloc[:, 1:-1].values)
 
-# 训练集标签样本
+# 测试集标签样本
 test_Y = np.mat(test_data.iloc[:, -1].values).T
 
 # 使用弱分类器对特征矩阵进行分类
