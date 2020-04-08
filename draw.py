@@ -67,8 +67,8 @@ def draw_accuracy():
     plt.plot(x, y_train_accuracy, ls=':', lw=2, label='训练准确率')
     plt.plot(x, y_test_accuracy, ls='--', lw=2, label='测试准确率')
     plt.plot(x, y_cross_validation, ls='-', lw=2, label='5折交叉验证准确率',color="red")
-    plt.savefig('./image/accuracy.png')
     plt.legend()
+    plt.savefig('./image/accuracy.png')
     plt.show()
 
 
