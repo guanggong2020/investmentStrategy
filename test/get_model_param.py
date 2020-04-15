@@ -60,8 +60,8 @@ def reCal():
     test_accuracy = []
     for i in range(1, 201):
         train_acc, test_acc = calAcc(train_data, i)
-        train_accuracy.append(train_acc)
-        test_accuracy.append(test_acc)
+        train_accuracy.append(round(train_acc*100,2))
+        test_accuracy.append(round(test_acc*100,2))
     return train_accuracy, test_accuracy
 
 
@@ -107,7 +107,7 @@ def cross_validation():
             score = []
             test_acc = predict_cross_validation(train_data.iloc[train_index], train_data.iloc[test_index], i)
             score.append(test_acc)
-        scores.append(np.mean(score))
+        scores.append(round(np.mean(score)*100,2))
     return scores
 
 
@@ -120,5 +120,5 @@ if __name__ == '__main__':
     # 5折交叉验证准确率
     scores = cross_validation()
     df = pd.DataFrame({'5折交叉验证准确率': scores, '训练准确率': train_accuracy, '测试准确率': test_accuracy})
-    df.to_csv('../data/accuracy/accuracy.csv')
+    df.to_csv('../data/accuracy/accuracy_v4.csv')
 

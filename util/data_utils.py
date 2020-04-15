@@ -47,7 +47,7 @@ def get_hs300_data(date1, date2, filename):
 # 将股票数据从本地文件的最后日期更新至当日
 # code:股票代码
 def update_stock_data(code):
-    filename = '../data/' + code + '.csv'
+    filename = '../data/stock_basic/' + code + '.csv'
     (filepath, tempfilename) = os.path.split(filename)
     (stock_code, extension) = os.path.splitext(tempfilename)
     f = open(filename, 'r')
@@ -119,13 +119,11 @@ def download_all_stock():
     pool = pd.read_csv('../data/stock_basic/stock_basic.csv')
     print('获得上市股票总数：', len(pool) - 1)
     j = 1
-    for code in pool.ts_code:
-        # code = "{0:06d}".format(code)
+    for code in pool.ts_code[3074:]:
         print('正在获取第%d家，股票代码%s.' % (j, code))
         j += 1
-        path = '../data/stock_basic/'+code+'.csv'
-        if not os.path.exists('../data/stock_basic/'+code+'.csv'):
-            df = pro.daily(ts_code=code, start_date='20180101')
-            df.to_csv(path)
-
-
+        path = '../data/stock_basic/' + code + '.csv'
+        # if not os.path.exists('../data/stock_basic/'+code+'.csv'):
+        df = pro.daily(ts_code=code, start_date='20180101')
+        df = df.sort_values(by='trade_date', ascending=True)
+        df.to_csv(path, index=0)

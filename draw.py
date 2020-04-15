@@ -29,8 +29,6 @@ def drawStockTrend(name, start, imageName):
     plt.plot(data.index, data['high'], label='high', marker='o', linestyle=':', linewidth=1, markersize=3,
              color='green')
     plt.plot(data.index, data['low'], label='low', marker='o', linestyle=':', linewidth=1, markersize=3, color='blue')
-    # plt.plot(data.index, data['ma5'], label='ma5', marker='o', linestyle=':', linewidth=1, markersize=3, color='yellow')
-    # plt.plot(data.index, data['ma10'], label='ma10', marker='o', linestyle=':', linewidth=1, markersize=3,color='orange')
     plt.plot(data.index, data['close'], label='close', marker='o', linestyle='-', linewidth=2, markersize=4,
              color='red')
 
@@ -60,15 +58,24 @@ def drawStockTrend(name, start, imageName):
 # 绘制弱分类器个数与准确率折线图
 def draw_accuracy():
     x = range(200)
-    df = pd.read_csv('./data/accuracy/accuracy.csv')
+    df = pd.read_csv('./data/accuracy/accuracy_v4.csv')
     y_train_accuracy = df['训练准确率']
     y_test_accuracy = df['测试准确率']
     y_cross_validation = df['5折交叉验证准确率']
     plt.plot(x, y_train_accuracy, ls=':', lw=2, label='训练准确率')
     plt.plot(x, y_test_accuracy, ls='--', lw=2, label='测试准确率')
-    plt.plot(x, y_cross_validation, ls='-', lw=2, label='5折交叉验证准确率',color="red")
+    plt.plot(x, y_cross_validation, ls='-', lw=2, label='5折交叉验证准确率', color="red")
     plt.legend()
-    plt.savefig('./image/accuracy.png')
+    plt.savefig('./image/accuracy_v4.png')
+    plt.show()
+
+
+def draw_hs300_index():
+    df = pd.read_csv('../data/index_data/399300.csv')
+    y = df['yield']
+    x = ['2018','2019','']
+    plt.plot(x, y, ls='-', lw=2, label='基准', color="blue")
+    plt.legend()
     plt.show()
 
 

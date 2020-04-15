@@ -31,19 +31,15 @@ def AdaboostTrainDS(xMat, yMat, maxC=40):
     aggClass = np.mat(np.zeros((m, 1)))  # 记录每个数据点的类别估计累计值
     for i in range(maxC):
         Stump, error, bestClas = buildStump(xMat, yMat, D)  # 构建单层决策树（最佳单层决策树、最小误差、最佳的分类结果）
-        # print(f"D:{D.T}")
         alpha = float(0.5 * np.log((1 - error) / max(error, 1e-16)))  # 计算弱分类器权重alpha
         Stump['alpha'] = np.round(alpha, 2)  # 存储弱学习算法权重,保留两位小数
         weakClass.append(Stump)  # 存储单层决策树
-        # print("bestClas: ", bestClas.T)
         expon = np.multiply(-1 * alpha * yMat, bestClas)  # 计算e的指数项
         D = np.multiply(D, np.exp(expon))
         D = D / D.sum()  # 根据样本权重公式，更新样本权重
         aggClass += alpha * bestClas  # 更新累计类别估计值
-        # print(f"aggClass: {aggClass.T}" )
         aggErr = np.multiply(np.sign(aggClass) != yMat, np.ones((m, 1)))  # 计算误差
         errRate = aggErr.sum() / m
-        # print(f"分类错误率: {errRate}")
         if errRate == 0: break  # 误差为0，退出循环
     return weakClass,aggClass
 
@@ -69,5 +65,4 @@ def AdaClassify(data, weakClass):
                                  weakClass[i]['阈值'],
                                  weakClass[i]['标志'])
         aggClass += weakClass[i]['alpha'] * classEst
-        # print(aggClass)
     return np.sign(aggClass),aggClass

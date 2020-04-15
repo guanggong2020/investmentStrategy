@@ -18,7 +18,7 @@ train_Y = np.mat(train_data.iloc[:, -1].values).T
 weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC=40)
 
 # 使用弱分类器对特征矩阵进行分类
-predictions,aggClass = AdaClassify(train_X, weakClass)
+predictions, aggClass = AdaClassify(train_X, weakClass)
 
 # print(predictions)
 # 计算训练集分类准确率
@@ -36,9 +36,9 @@ print(f'训练集准确率为{train_acc}')
 
 # 获取测试数据集（20190329）
 test_data = pd.read_csv('../data/day_stock_process/20190301.csv')[['ts_code', 'open', 'high', 'low', 'close',
-                                                                    'pre_close', 'change', 'pct_chg', 'vol',
-                                                                    'amount',
-                                                                    'label']]
+                                                                   'pre_close', 'change', 'pct_chg', 'vol',
+                                                                   'amount',
+                                                                   'label']]
 # 测试集特征样本
 test_X = np.mat(test_data.iloc[:, 1:-1].values)
 
@@ -46,7 +46,7 @@ test_X = np.mat(test_data.iloc[:, 1:-1].values)
 test_Y = np.mat(test_data.iloc[:, -1].values).T
 
 # 使用弱分类器对特征矩阵进行分类
-predictions,aggClass = AdaClassify(test_X, weakClass)
+predictions, aggClass = AdaClassify(test_X, weakClass)
 
 # 计算测试集分类准确率
 test_re = 0
@@ -57,17 +57,15 @@ for i in range(n):
 test_acc = test_re / n
 print(f'测试集准确率为{test_acc}')
 
-
 test_data['prediction'] = predictions
 test_data['aggClass'] = aggClass
 # 按分类结果降序排序
-test_data.sort_values(by='prediction',ascending=False,inplace=True)
+test_data.sort_values(by='prediction', ascending=False, inplace=True)
 # 按分类的累计类别估计值降序排序
-test_data.sort_values(by='aggClass',ascending=False,inplace=True)
+test_data.sort_values(by='aggClass', ascending=False, inplace=True)
 # 获取前50支股票
 recommend_stock = test_data.head(50)['ts_code']
 print(recommend_stock.iloc[0])
-
 
 # 根据股票代码获取股票名称
 df = pd.read_csv('../data/stock_basic/stock_basic.csv')

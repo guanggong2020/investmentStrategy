@@ -39,7 +39,7 @@ def buildStump(xMat, yMat, D):
     xMat = np.mat(xMat)
     yMat = np.mat(yMat)
     m, n = xMat.shape  # m为样本个数(行数)，n为特征数（列数）
-    Steps = 10  # 初始化一个步数
+    Steps = 20  # 初始化一个步数
     bestStump = {}  # 用字典形式来储存树桩信息
     bestClas = np.mat(np.zeros((m, 1)))  # 初始化分类结果为0
     minE = np.inf  # 最小误差初始化为正无穷大

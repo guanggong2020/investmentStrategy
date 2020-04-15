@@ -57,29 +57,6 @@ def split_train_test(dataMax):
 
 
 """
-获取指定股票前240个交易日的数据
-"""
-
-
-# def loadDataSet(code):
-#     dataMat = pd.read_csv(args.hs300path + code + '.csv')
-#     data = dataMat[:241:20][['open', 'low', 'high', 'close', 'volume', 'p_change']].copy()
-#     m = data.shape[0]
-#     data['label'] = np.ones((m, 1))
-#     for i in range(m):
-#         P_change_sum = sum(dataMat['p_change'][i * 20:(i + 1) * 20])
-#         if P_change_sum > 0:
-#             data['label'].iloc[i] = 1
-#         else:
-#             data['label'].iloc[i] = -1
-#     train_X = np.mat(data.iloc[:-1, :-1].values)
-#     train_Y = np.mat(data.iloc[:-1, -1].values).T
-#     test_X = np.mat(data.iloc[-1, :-1].values)
-#     test_Y = np.mat(data.iloc[-1, -1]).T
-#     return train_X, train_Y, test_X, test_Y
-
-
-"""
 从已下载的数据中获取指定时间点的股票数据，并合并成一个dataframe
 添加标签
 """
@@ -97,13 +74,13 @@ def merge_day_data(time):
         data = df[time:time]
         if data is not None:
             day_stock = pd.concat([day_stock, data])
-    day_stock = day_stock.sort_values(by = 'yield',ascending=False)
+    day_stock = day_stock.sort_values(by='yield', ascending=False)
     l = len(day_stock)
-    day_stock = pd.concat([day_stock[:int(0.25*l)],day_stock[int(0.75*l):]])
+    day_stock = pd.concat([day_stock[:int(0.25 * l)], day_stock[int(0.75 * l):]])
     m = day_stock.shape[0]
-    day_stock['label'] = np.ones((m,1))
+    day_stock['label'] = np.ones((m, 1))
     for i in range(m):
-        if i > len(day_stock)/2 - 1:
+        if i > len(day_stock) / 2 - 1:
             day_stock['label'].iloc[i] = -1
     return day_stock
 
@@ -134,7 +111,19 @@ def mark_stock_yield():
     for code in pool.ts_code:
         df = pd.read_csv('../data/stock_basic/' + code + '.csv')
         m = df.shape[0]
-        df['yield'] = np.zeros((m,1))
-        df['yield'] = (df['close'].shift(20)-df['close'])/df['close']
-        df.to_csv('../data/mark_yield/' + code + '.csv')
+        df['yield'] = np.zeros((m, 1))
+        df['yield'] = np.round((df['close'].shift(-20) - df['close']) / df['close'], 2)
+        df.to_csv('../data/mark_yield/' + code + '.csv', index=0)
 
+
+"""
+标注沪深300指数数据未来20天的收益率
+"""
+
+
+def mark_hs300_yield():
+    df = pd.read_csv('../data/index_data/399300.csv')
+    m = df.shape[0]
+    df['yield'] = np.zeros((m, 1))
+    df['yield'] = np.round((df['close'] - df['close'].shift(20)) / df['close'], 2)
+    df.to_csv('../data/index_data/399300.csv', index=0)
