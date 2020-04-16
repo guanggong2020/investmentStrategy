@@ -6,7 +6,7 @@ import time
 
 from pandas import DataFrame
 
-from backtest.backtest import drawhs300line
+from backtest.backtest import drawhs300line, calStockYearProfit
 from draw import draw_hs300_index
 from util.data_utils import download_all_stock, get_hs300_data
 from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set, mark_hs300_yield
@@ -95,4 +95,17 @@ if __name__ == '__main__':
     # df = merge_day_data('20180102')
     # path = '../data/back/20180102.csv'
     # df.to_csv(path)
-    drawhs300line()
+    # drawhs300line()
+
+    # a = DataFrame({'name':[],'age':[]})
+    # # a = a.append({'name':'zs','age':12},ignore_index=True)
+    # if not a.empty:
+    #     if 'ls' not in a['name'].values:
+    #          print("hello")
+    #     else:
+    #         print("none")
+    #         print(type(a['name']))
+    # else:
+    #     print("kong")
+    df = calStockYearProfit()
+    df.to_csv('../data/back/result.csv')
