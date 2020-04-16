@@ -62,7 +62,7 @@ def calStockYearProfit():
     train_X, train_Y, test_X, test_Y = split_train_test(train_data)
     # 训练得到弱分类器信息
     weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC=15)
-    for dt in cal_date[:1]:
+    for dt in cal_date:
         path = '../data/back/' + str(dt) + '.csv'
         df = pd.read_csv(path)[['ts_code', 'open', 'high', 'low', 'close',
                                 'pre_close', 'change', 'pct_chg', 'vol',
@@ -80,7 +80,6 @@ def calStockYearProfit():
         df.sort_values(by='aggClass', ascending=False, inplace=True)
         # 获取前50支股票
         recommend_stock = df.head(50)['ts_code']
-        print(capital_change)
         dcode = df['ts_code']
         if not keepstock.empty:
             for stock in keepstock['code'].values:
@@ -93,13 +92,23 @@ def calStockYearProfit():
                     # 获取股票价格
                     name_index = dcode[dcode.values == stock].index
                     price = df['close'][name_index]
-                    print(stock + "------->" + number + "------->" + price)
+                    # print(stock + "------->" + number + "------->" + price)
                     # 计算剩余资金
                     capital_change += number * price
                     # 删除股票
                     keepstock.drop(index)
-        print(capital_change)
-        if not recommend_stock.empty:
+
+        if keepstock.empty:
+            for stock in recommend_stock:
+                name_index = dcode[dcode.values == stock].index[0]
+                price = df['close'][name_index]
+                print(price)
+                # 买入
+                capital_change -= 100000
+                # 计算能买多少股
+                num = int(100000 / price)
+                keepstock = keepstock.append({'code': stock, 'number': num}, ignore_index=True)
+        else:
             for stock in recommend_stock:
                 if stock not in keepstock['code'].values:
                     name_index = dcode[dcode.values == stock].index
@@ -109,18 +118,22 @@ def calStockYearProfit():
                     # 计算能买多少股
                     num = int(100000 / price)
                     keepstock = keepstock.append({'code': stock, 'number': num}, ignore_index=True)
-        for stock in keepstock['code'].values:
-            # 股票价格
-            name_index = dcode[dcode.values == stock].index
-            price = df['close'][name_index]
-            # 股票数量
-            index = keepstock.loc[(keepstock['code'] == stock)].index
-            number = keepstock['number'][index]
-            capital_change += price*number
-            print(price)
-            print(number)
-            print(capital_change)
-        rate = (capital_change - capital_base) / capital_base
+
+        # print(keepstock)
+        if not keepstock.empty:
+            for stock in keepstock['code'].values:
+                # 股票价格
+                if stock in dcode:
+                    name_index = dcode[dcode.values == stock].index[0]
+                    price = df['close'][name_index]
+                    # 股票数量
+                    index = keepstock.loc[(keepstock['code'] == stock)].index[0]
+                    number = keepstock['number'][index]
+                    capital_change += price * number
+                # print(stock)
+                # print(price)
+        rate = np.round((capital_change - capital_base) / capital_base, 2)
         capital_base = capital_change
         save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)
+        print(save_date_yield)
     return save_date_yield
