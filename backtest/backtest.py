@@ -10,20 +10,26 @@ from util.dataprocess import merge_day_data, split_train_test
 plt.rcParams['axes.unicode_minus'] = False  # '-'显示为方块的问题
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
 
+"""
+绘制沪深300指数收益率以及策略收益率的比较图
+"""
 
-def drawhs300line():
+
+def drawprofitline():
     # 读取沪深300指数数据
     df = pd.read_csv('../data/index_data/399300.csv')
     # df['date'] = df['date'].str.replace('-','')
-
+    stockprofit = pd.read_csv('../data/back/result.csv')
     data = df[['date', 'yield']][1::20]
     data = data.fillna(0)
     plt.plot(data['date'], data['yield'], label='基准收益率', color='blue', ls=':', lw=2)
+    plt.plot(data['date'], stockprofit['yield'], label='策略收益率', color='black', ls=':', lw=2)
     plt.xlabel("时间")
     plt.ylabel("收益率")
     plt.xticks(data['date'][::5], rotation=45)
     plt.axhline(y=0, c='r', ls='--', lw=2)
     plt.legend()
+    plt.savefig('../image/profit.png')
     plt.show()
 
 
@@ -38,7 +44,7 @@ def calStockYearProfit():
     # 记录买卖后的资金
     capital_change = capital_base
     # 持仓股票代码和每只股票熟练
-    keepstock = DataFrame({'code': [], 'number': [], 'price':[]})
+    keepstock = DataFrame({'code': [], 'number': [], 'price': []})
     # 存储日期和收益率
     save_date_yield = DataFrame({'date': [], 'yield': []})
     # 读取交易日期
@@ -132,9 +138,8 @@ def calStockYearProfit():
                     i += 1
                     keepstock = keepstock.append({'code': stock, 'number': num, 'price': price}, ignore_index=True)
                 else:
-                    keepstock.loc[name_index,'price'] = price
+                    keepstock.loc[name_index, 'price'] = price
                     print("这一步有吗----------------------------------------------")
-
 
         print("买入股票")
         print(i)
@@ -154,7 +159,7 @@ def calStockYearProfit():
                 index = keepstock.loc[(keepstock['code'] == stock)].index[0]
                 number = keepstock['number'][index]
                 capital_change += price * number
-        rate = np.round((capital_change - capital_base) / capital_base,2)
+        rate = np.round((capital_change - capital_base) / capital_base, 2)
         # rate = (capital_change - capital_base) / capital_base
         capital_base = capital_change
         save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)

@@ -1,12 +1,11 @@
 import datetime
 
-
 import pandas as pd
 import time
 
 from pandas import DataFrame
 
-from backtest.backtest import drawhs300line, calStockYearProfit
+from backtest.backtest import  calStockYearProfit, drawprofitline
 from draw import draw_hs300_index
 from util.data_utils import download_all_stock, get_hs300_data
 from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set, mark_hs300_yield
@@ -107,5 +106,6 @@ if __name__ == '__main__':
     #         print(type(a['name']))
     # else:
     #     print("kong")
-    df = calStockYearProfit()
-    df.to_csv('../data/back/result.csv')
+    # df = calStockYearProfit()
+    # df.to_csv('../data/back/result.csv')
+    drawprofitline()
