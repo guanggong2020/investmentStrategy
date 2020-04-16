@@ -14,7 +14,6 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
 def drawhs300line():
     # 读取沪深300指数数据
     df = pd.read_csv('../data/index_data/399300.csv')
-    # print(cal_date.head())
     # df['date'] = df['date'].str.replace('-','')
 
     data = df[['date', 'yield']][1::20]
@@ -35,11 +34,11 @@ def drawhs300line():
 
 def calStockYearProfit():
     # 起始资金10亿
-    capital_base = 1000000000
+    capital_base = 10000000
     # 记录买卖后的资金
     capital_change = capital_base
     # 持仓股票代码和每只股票熟练
-    keepstock = DataFrame({'code': [], 'number': []})
+    keepstock = DataFrame({'code': [], 'number': [], 'price':[]})
     # 存储日期和收益率
     save_date_yield = DataFrame({'date': [], 'yield': []})
     # 读取交易日期
@@ -78,62 +77,86 @@ def calStockYearProfit():
         df.sort_values(by='prediction', ascending=False, inplace=True)
         # 按分类的累计类别估计值降序排序
         df.sort_values(by='aggClass', ascending=False, inplace=True)
+        df = df.dropna()
         # 获取前50支股票
         recommend_stock = df.head(50)['ts_code']
+        # print(df.head(5)[['ts_code','open']])
         dcode = df['ts_code']
+        # ------------------- 卖出股票-------------------------
+        print("当前时间")
+        print(dt)
+        j = 0
         if not keepstock.empty:
             for stock in keepstock['code'].values:
                 if stock not in recommend_stock:
-                    index = keepstock.loc[(keepstock['code'] == stock)].index
+                    stock_index = keepstock.loc[(keepstock['code'] == stock)].index[0]
                     # 股票数量
-                    number = keepstock['number'][index]
-
-                    # 卖出
+                    number = keepstock['number'][stock_index]
                     # 获取股票价格
-                    name_index = dcode[dcode.values == stock].index
-                    price = df['close'][name_index]
-                    # print(stock + "------->" + number + "------->" + price)
+                    if stock in dcode:
+                        name_index = dcode[dcode == stock].index[0]
+                        price = df['close'][name_index]
+                    else:
+                        price_index = keepstock.loc[(keepstock['code'] == stock)].index[0]
+                        price = keepstock['price'][price_index]
                     # 计算剩余资金
                     capital_change += number * price
+                    j += 1
                     # 删除股票
-                    keepstock.drop(index)
-
+                    keepstock = keepstock.drop(stock_index)
+        print("卖出股票")
+        print(j)
+        print("还剩多少股票")
+        print(len(keepstock))
+        # ------------------- 买入股票-------------------------
+        i = 0
         if keepstock.empty:
             for stock in recommend_stock:
-                name_index = dcode[dcode.values == stock].index[0]
-                price = df['close'][name_index]
-                print(price)
+                name_index = dcode[dcode == stock].index[0]
+                price = df['open'][name_index]
                 # 买入
                 capital_change -= 100000
                 # 计算能买多少股
                 num = int(100000 / price)
-                keepstock = keepstock.append({'code': stock, 'number': num}, ignore_index=True)
+                i += 1
+                keepstock = keepstock.append({'code': stock, 'number': num, 'price': price}, ignore_index=True)
         else:
             for stock in recommend_stock:
+                name_index = dcode[dcode == stock].index[0]
+                price = df['open'][name_index]
                 if stock not in keepstock['code'].values:
-                    name_index = dcode[dcode.values == stock].index
-                    price = df['close'][name_index]
                     # 买入
                     capital_change -= 100000
                     # 计算能买多少股
                     num = int(100000 / price)
-                    keepstock = keepstock.append({'code': stock, 'number': num}, ignore_index=True)
+                    i += 1
+                    keepstock = keepstock.append({'code': stock, 'number': num, 'price': price}, ignore_index=True)
+                else:
+                    keepstock.loc[name_index,'price'] = price
+                    print("这一步有吗----------------------------------------------")
 
-        # print(keepstock)
+
+        print("买入股票")
+        print(i)
+        print("还剩多少股票")
+        print(len(keepstock))
+
         if not keepstock.empty:
             for stock in keepstock['code'].values:
                 # 股票价格
                 if stock in dcode:
-                    name_index = dcode[dcode.values == stock].index[0]
+                    name_index = dcode[dcode == stock].index[0]
                     price = df['close'][name_index]
-                    # 股票数量
-                    index = keepstock.loc[(keepstock['code'] == stock)].index[0]
-                    number = keepstock['number'][index]
-                    capital_change += price * number
-                # print(stock)
-                # print(price)
-        rate = np.round((capital_change - capital_base) / capital_base, 2)
+                else:
+                    price_index = keepstock.loc[(keepstock['code'].values == stock)].index[0]
+                    price = keepstock['price'][price_index]
+                # 股票数量
+                index = keepstock.loc[(keepstock['code'] == stock)].index[0]
+                number = keepstock['number'][index]
+                capital_change += price * number
+        rate = np.round((capital_change - capital_base) / capital_base,2)
+        # rate = (capital_change - capital_base) / capital_base
         capital_base = capital_change
         save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)
-        print(save_date_yield)
+        # print(save_date_yield)
     return save_date_yield
