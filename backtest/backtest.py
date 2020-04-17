@@ -17,19 +17,18 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
 
 def drawprofitline():
     # 读取沪深300指数数据
-    df = pd.read_csv('../data/index_data/399300.csv')
+    # df = pd.read_csv('../data/index_data/399300.csv')
     # df['date'] = df['date'].str.replace('-','')
+    df = calhs300yearprofit()
     stockprofit = pd.read_csv('../data/back/result.csv')
-    data = df[['date', 'yield']][1::20]
-    data = data.fillna(0)
-    plt.plot(data['date'], data['yield'], label='基准收益率', color='blue', ls=':', lw=2)
-    plt.plot(data['date'], stockprofit['yield'], label='策略收益率', color='black', ls=':', lw=2)
+    plt.plot(df['date'], df['yield'], label='基准收益率', color='blue', ls=':', lw=2)
+    plt.plot(df['date'], stockprofit['yield'], label='策略收益率', color='black', ls=':', lw=2)
     plt.xlabel("时间")
     plt.ylabel("收益率")
-    plt.xticks(data['date'][::5], rotation=45)
+    plt.xticks(df['date'][::5], rotation=45)
     plt.axhline(y=0, c='r', ls='--', lw=2)
     plt.legend()
-    plt.savefig('../image/profit.png')
+    plt.savefig('../image/profit_v1.png')
     plt.show()
 
 
@@ -39,7 +38,7 @@ def drawprofitline():
 
 
 def calStockYearProfit():
-    # 起始资金10亿
+    # 起始资金1000万
     capital_base = 10000000
     # 记录买卖后的资金
     capital_change = capital_base
@@ -89,9 +88,6 @@ def calStockYearProfit():
         # print(df.head(5)[['ts_code','open']])
         dcode = df['ts_code']
         # ------------------- 卖出股票-------------------------
-        print("当前时间")
-        print(dt)
-        j = 0
         if not keepstock.empty:
             for stock in keepstock['code'].values:
                 if stock not in recommend_stock:
@@ -110,10 +106,6 @@ def calStockYearProfit():
                     j += 1
                     # 删除股票
                     keepstock = keepstock.drop(stock_index)
-        print("卖出股票")
-        print(j)
-        print("还剩多少股票")
-        print(len(keepstock))
         # ------------------- 买入股票-------------------------
         i = 0
         if keepstock.empty:
@@ -139,13 +131,6 @@ def calStockYearProfit():
                     keepstock = keepstock.append({'code': stock, 'number': num, 'price': price}, ignore_index=True)
                 else:
                     keepstock.loc[name_index, 'price'] = price
-                    print("这一步有吗----------------------------------------------")
-
-        print("买入股票")
-        print(i)
-        print("还剩多少股票")
-        print(len(keepstock))
-
         if not keepstock.empty:
             for stock in keepstock['code'].values:
                 # 股票价格
@@ -163,5 +148,44 @@ def calStockYearProfit():
         # rate = (capital_change - capital_base) / capital_base
         capital_base = capital_change
         save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)
-        # print(save_date_yield)
     return save_date_yield
+
+
+"""
+计算沪深300收益率曲线图
+"""
+
+
+def calhs300yearprofit():
+    # 起始资金1000万
+    capital_base = 10000000
+    capital_change = capital_base
+    # 持股
+    keepstocknum = 0
+    # 存储日期和收益率
+    save_date_yield = DataFrame({'date': [], 'yield': []})
+    # 读取沪深300指数数据
+    df = pd.read_csv('../data/index_data/399300.csv')
+    data = df[['date', 'open', 'close']][1::20]
+    for dt in data['date']:
+        # 获取开盘价和收盘价
+        dt_index = data['date'][data['date'] == dt].index[0]
+        open_price = data['open'][dt_index]
+        close_price = data['close'][dt_index]
+        # 卖出持有的股票
+        capital_change += keepstocknum * close_price
+        # 计算收益率
+        rate = np.round((capital_change - capital_base) / capital_base, 2)
+        capital_base = capital_change
+        save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)
+        # 买入5000000元的股票
+        capital_change -= 5000000
+        # 多少股
+        keepstocknum = int(5000000 / open_price)
+    return save_date_yield
+
+
+if __name__ == '__main__':
+    # df = calhs300yearprofit()
+    # print(df)
+    drawprofitline()
