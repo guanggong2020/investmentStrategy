@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
 import os
+import numpy as np
+from matplotlib.font_manager import FontProperties
 
 plt.rcParams['axes.unicode_minus'] = False  # '-'显示为方块的问题
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
@@ -73,11 +75,50 @@ def draw_accuracy():
 def draw_hs300_index():
     df = pd.read_csv('../data/index_data/399300.csv')
     y = df['yield']
-    x = ['2018','2019','']
+    x = ['2018', '2019', '']
     plt.plot(x, y, ls='-', lw=2, label='基准', color="blue")
     plt.legend()
     plt.show()
 
+
+def plotROC(predStrengths, classLabels):
+    """
+    绘制ROC
+    Parameters:
+        predStrengths - 分类器的预测强度
+        classLabels - 类别
+    Returns:
+        无
+    """
+    font = FontProperties(fname=r"E:\simsun.ttc", size=14)
+    cur = (1.0, 1.0)  # 绘制光标的位置
+    ySum = 0.0  # 用于计算AUC
+    numPosClas = np.sum(np.array(classLabels) == 1.0)  # 统计正类的数量
+    yStep = 1 / float(numPosClas)  # y轴步长
+    xStep = 1 / float(len(classLabels) - numPosClas)  # x轴步长
+
+    sortedIndicies = predStrengths.argsort()  # 预测强度排序
+
+    fig = plt.figure()
+    fig.clf()
+    ax = plt.subplot(111)
+    for index in sortedIndicies.tolist()[0]:
+        if classLabels[index] == 1.0:
+            delX = 0;
+            delY = yStep
+        else:
+            delX = xStep;
+            delY = 0
+            ySum += cur[1]  # 高度累加
+        ax.plot([cur[0], cur[0] - delX], [cur[1], cur[1] - delY], c='b')  # 绘制ROC
+        cur = (cur[0] - delX, cur[1] - delY)  # 更新绘制光标的位置
+    ax.plot([0, 1], [0, 1], 'b--')
+    plt.title('ROC曲线', FontProperties=font)
+    plt.xlabel('假阳率', FontProperties=font)
+    plt.ylabel('真阳率', FontProperties=font)
+    ax.axis([0, 1, 0, 1])
+    print('AUC面积为:', ySum * xStep)  # 计算AUC
+    plt.show()
 
 if __name__ == '__main__':
     draw_accuracy()

@@ -2,6 +2,7 @@ import datetime
 
 import pandas as pd
 import time
+import tushare as ts
 
 from pandas import DataFrame
 
@@ -10,6 +11,7 @@ from draw import draw_hs300_index
 from util.data_utils import download_all_stock, get_hs300_data
 from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set, mark_hs300_yield
 
+pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
 """
 代码测试文件
 """
@@ -108,4 +110,9 @@ if __name__ == '__main__':
     #     print("kong")
     # df = calStockYearProfit()
     # df.to_csv('../data/back/result.csv')
-    drawprofitline()
+    # drawprofitline()
+
+    for t in ['20190301','20190329','20190429','20190530','20190628','20190726','20190823','20190923','20191028','20191125','20191223','20200121','20200226','20200325']:
+        df = pro.daily(trade_date=t)
+        print(len(df))
+

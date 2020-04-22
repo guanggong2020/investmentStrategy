@@ -32,7 +32,7 @@ def calAcc(maxC=40):
         if predictions[i] == train_Y[i]:
             train_re += 1
     train_acc = train_re / m
-    print(f'训练集准确率为{train_acc}')
+    # print(f'训练集准确率为{train_acc}')
 
     # 6、计算测试集分类准确率
     test_re = 0
@@ -42,7 +42,7 @@ def calAcc(maxC=40):
         if predictions[i] == test_Y[i]:
             test_re += 1
     test_acc = test_re / n
-    print(f'测试集准确率为{test_acc}')
+    # print(f'测试集准确率为{test_acc}')
     return train_acc, test_acc
 
 """
@@ -63,4 +63,5 @@ def reCal():
 
 
 if __name__ == '__main__':
-    reCal()
+    # reCal()
+    calAcc(1)
