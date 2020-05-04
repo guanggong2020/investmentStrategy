@@ -16,7 +16,7 @@ train_X = np.mat(train_data.iloc[:, :-1].values)
 train_Y = np.mat(train_data.iloc[:, -1].values).T
 
 # 训练得到弱分类器信息
-weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC=1)
+weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC=51)
 
 # 使用弱分类器对特征矩阵进行分类
 predictions, aggClass = AdaClassify(train_X, weakClass)
@@ -36,7 +36,7 @@ print(f'训练集准确率为{train_acc}')
 """
 
 # 获取测试数据集（20190329）
-test_data = pd.read_csv('../data/day_stock_process/20190301.csv')[['ts_code', 'open', 'high', 'low', 'close',
+test_data = pd.read_csv('../data/day_stock_process/20190329.csv')[['ts_code', 'open', 'high', 'low', 'close',
                                                                    'pre_close', 'change', 'pct_chg', 'vol',
                                                                    'amount',
                                                                    'label']]
@@ -68,7 +68,7 @@ test_data.sort_values(by='aggClass', ascending=False, inplace=True)
 recommend_stock = test_data.head(50)['ts_code']
 
 # 根据股票代码获取股票名称
-df = pd.read_csv('../data/stock_basic/stock_basic.csv')
+df = pd.read_csv('../data/stock_list/stock_basic.csv')
 dname = df['name']
 dcode = df['ts_code']
 stock_name = []

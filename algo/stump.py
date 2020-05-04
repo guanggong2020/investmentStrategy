@@ -1,7 +1,7 @@
 # _*_coding:utf-8_*_
 import numpy as np
 
-from util.cal_gini import calcMinGiniIndex
+
 
 """
 单层决策树分类函数
@@ -37,27 +37,17 @@ def stumpClassify(dataMatrix, dimen, threshVal, threshIneq):
 
 
 def buildStump(xMat, yMat, D):
-    xMat = np.mat(xMat)
-    yMat = np.mat(yMat)
-    # yMat = np.mat(yMat).T    在这里转置，直接传入数据集即可
     m, n = xMat.shape  # m为样本个数(行数)，n为特征数（列数）
     Steps = 10  # 初始化一个步数
     bestStump = {}  # 用字典形式来储存树桩信息
     bestClas = np.mat(np.zeros((m, 1)))  # 初始化分类结果为0
     minE = np.inf  # 最小误差初始化为正无穷大
-    # min_gini = float('inf')
-    # feature = 0
-    # min_gini_point = None
+
     for i in range(n):  # 第一层循环，遍历所有特征
         Min = xMat[:, i].min()  # 找到特征中最小值
         Max = xMat[:, i].max()  # 找到特征中最大值
         stepSize = (Max - Min) / Steps  # 计算步长
-        # 计算基尼指数
-        # gini0, split_point0 = calcMinGiniIndex(xMat[:, i], yMat, D)
-        # if min_gini > gini0:
-        #     min_gini = gini0
-        #     min_gini_point = split_point0
-        #     feature = i
+
         for j in range(-1, int(Steps) + 1):  # 第二层循环，遍历每个步长
 
             for S in ['lt', 'gt']:  # 大于和小于的情况，均遍历。lt:less than，gt:greater than
@@ -73,7 +63,4 @@ def buildStump(xMat, yMat, D):
                     bestStump['特征列'] = i
                     bestStump['阈值'] = Q
                     bestStump['标志'] = S
-    # print(f'划分后gini指数最小的特征：{feature},划分的值是：{min_gini_point}')
-    # print(bestStump)
-    # print(f'第一次运行分类最佳的最佳结果{bestClas.T}')
     return bestStump, minE, bestClas

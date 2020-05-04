@@ -3,12 +3,15 @@ import datetime
 import pandas as pd
 import time
 import tushare as ts
+from config import Arg
+import numpy as np
+import matplotlib.pyplot as plt
 
 from pandas import DataFrame
 
-from backtest.backtest import  calStockYearProfit, drawprofitline
+from backtest.backtest import calStockYearProfit, drawprofitline
 from draw import draw_hs300_index
-from util.data_utils import download_all_stock, get_hs300_data
+from util.data_utils import download_all_stock, get_hs300_data, update_stock_data
 from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set, mark_hs300_yield
 
 pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
@@ -64,7 +67,7 @@ pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
 # print(len(cal_date))
 # print(cal_date)
 
-# df = pd.read_csv('../data/hs300/000001.csv',index_col='date',parse_dates=True)
+
 # print(df.head())
 # print('--------------------------------------------------------------')
 # data = df['2017-10-09':'2017-10-09']
@@ -84,6 +87,7 @@ pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
 # a = [1,2,3]
 # import numpy as np
 # print(np.mean(a))
+
 
 if __name__ == '__main__':
     # get_hs300_data('2018-01-01','2020-04-15','../data/index_data/')
@@ -112,7 +116,78 @@ if __name__ == '__main__':
     # df.to_csv('../data/back/result.csv')
     # drawprofitline()
 
-    for t in ['20190301','20190329','20190429','20190530','20190628','20190726','20190823','20190923','20191028','20191125','20191223','20200121','20200226','20200325']:
-        df = pro.daily(trade_date=t)
-        print(len(df))
+    # for t in ['20190301','20190329','20190429','20190530','20190628','20190726','20190823','20190923','20191028','20191125','20191223','20200121','20200226','20200325']:
+    #     df = pro.daily(trade_date=t)
+    #     print(len(df))
+
+    # df = pd.read_csv('../data/hs300/000001.csv', index_col='date', parse_dates=True)
+    # print(df)
+    # t = time.strftime("%Y%m%d",time.localtime(time.time()))
+    # print(t)
+    # print(type(t))
+    # arg = Arg()
+    # print(arg.current)
+    # print(type(arg.current))
+    # download_all_stock()
+    # update_stock_data()
+    import math
+
+    df = pd.read_csv('../data/data_from_mongodb/600000.csv')
+
+    df.dropna(subset=['totalMarketCapitalization'], inplace=True)
+
+    # 取对数
+    df['totalMarketCapitalization'] = df['totalMarketCapitalization'].apply(lambda x: math.log(x))
+    # print(df['totalMarketCapitalization'])
+
+    # 画箱线图
+
+    # 设置图形的显示风格
+    plt.style.use('ggplot')
+
+    # 设置中文和负号正常显示
+    plt.rcParams['font.sans-serif'] = 'Microsoft YaHei'
+    plt.rcParams['axes.unicode_minus'] = False
+
+    # 绘图：整体乘客的年龄箱线图
+
+    # plt.boxplot(x=df.totalMarketCapitalization,  # 指定绘图数据
+    #
+    #             patch_artist=True,  # 要求用自定义颜色填充盒形图，默认白色填充
+    #
+    #             showmeans=True,  # 以点的形式显示均值
+    #
+    #             boxprops={'color': 'black', 'facecolor': '#9999ff'},  # 设置箱体属性，填充色和边框色
+    #
+    #             flierprops={'marker': 'o', 'markerfacecolor': 'red', 'color': 'black'},  # 设置异常值属性，点的形状、填充色和边框色
+    #
+    #             meanprops={'marker': 'D', 'markerfacecolor': 'indianred'},  # 设置均值点的属性，点的形状、填充色
+    #
+    #             medianprops={'linestyle': '--', 'color': 'orange'})  # 设置中位数线的属性，线的类型和颜色
+    #
+    #
+    # plt.show()
+
+    def filter_extreme_MAD(series,n):
+        """
+        :param series:
+        :param n:
+        :return:中位数去极值
+        """
+        median = np.percentile(series,50)
+        new_median = np.percentile((series - median).abs(),50)
+        max_range = median + n*new_median
+        min_range = median - n*new_median
+        return np.clip(series,min_range,max_range)
+    df['totalMarketCapitalization'] = filter_extreme_MAD(df['totalMarketCapitalization'],5)
+    # print(df['totalMarketCapitalization'])
+
+    # 标准化
+    from sklearn.preprocessing import StandardScaler
+    # 归一化
+    from sklearn.preprocessing import MinMaxScaler
+    features = ['totalMarketCapitalization']
+    df = df[features]
+    df[features] = StandardScaler().fit_transform(df)
+    print(df)
 

@@ -103,7 +103,7 @@ def calStockYearProfit():
                         price = keepstock['price'][price_index]
                     # 计算剩余资金
                     capital_change += number * price
-                    j += 1
+
                     # 删除股票
                     keepstock = keepstock.drop(stock_index)
         # ------------------- 买入股票-------------------------

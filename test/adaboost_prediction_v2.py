@@ -5,7 +5,7 @@ import numpy as np
 # 获取数据集（20190301.csv）
 from algo.Adaboost import AdaClassify, AdaboostTrainDS
 from draw import plotROC
-from util.dataprocess import split_train_test
+from util.data_utils import split_train_test
 
 data = pd.read_csv('../data/day_stock_process/20190301.csv', index_col=0)[['open', 'high', 'low', 'close',
                                                                            'pre_close', 'change', 'pct_chg', 'vol',

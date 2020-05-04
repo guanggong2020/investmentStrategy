@@ -60,15 +60,15 @@ def drawStockTrend(name, start, imageName):
 # 绘制弱分类器个数与准确率折线图
 def draw_accuracy():
     x = range(200)
-    df = pd.read_csv('./data/accuracy/accuracy_v4.csv')
+    df = pd.read_csv('./data/accuracy/accuracy_v6.csv')
     y_train_accuracy = df['训练准确率']
     y_test_accuracy = df['测试准确率']
     y_cross_validation = df['5折交叉验证准确率']
     plt.plot(x, y_train_accuracy, ls=':', lw=2, label='训练准确率')
-    plt.plot(x, y_test_accuracy, ls='--', lw=2, label='测试准确率')
-    plt.plot(x, y_cross_validation, ls='-', lw=2, label='5折交叉验证准确率', color="red")
+    plt.plot(x, y_test_accuracy, ls=':', lw=2, label='测试准确率')
+    plt.plot(x, y_cross_validation, ls=':', lw=2, label='5折交叉验证准确率', color="red")
     plt.legend()
-    plt.savefig('./image/accuracy_v4.png')
+    plt.savefig('./image/accuracy_v6.png')
     plt.show()
 
 
@@ -119,6 +119,7 @@ def plotROC(predStrengths, classLabels):
     ax.axis([0, 1, 0, 1])
     print('AUC面积为:', ySum * xStep)  # 计算AUC
     plt.show()
+
 
 if __name__ == '__main__':
     draw_accuracy()

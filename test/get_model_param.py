@@ -2,19 +2,28 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import minmax_scale
+
 from algo.Adaboost import *
-from util.dataprocess import split_train_test
+
 from sklearn.model_selection import KFold
+
+from util.data_utils import split_train_test
 
 """
 获取弱分类器个数从1增加到200的过程中训练集和测试集的准确率
 """
 
 # 获取训练数据集（20190301.csv）
-train_data = pd.read_csv('../data/day_stock_process/20190301.csv')[['open', 'high', 'low', 'close',
+train_data = pd.read_csv('../data/train_test_set/train_mix.csv')[['open', 'high', 'low', 'close',
                                                                     'pre_close', 'change', 'pct_chg', 'vol',
                                                                     'amount',
                                                                     'label']]
+
+price_feature = ['open', 'high', 'low', 'close', 'pre_close']
+for feature in price_feature:
+    # 数据归一化
+    train_data[feature] = minmax_scale(train_data[feature])
 
 # 打乱数据集
 num = train_data.shape[0]
@@ -120,5 +129,5 @@ if __name__ == '__main__':
     # 5折交叉验证准确率
     scores = cross_validation()
     df = pd.DataFrame({'5折交叉验证准确率': scores, '训练准确率': train_accuracy, '测试准确率': test_accuracy})
-    df.to_csv('../data/accuracy/accuracy_v4.csv')
+    df.to_csv('../data/accuracy/accuracy_v7.csv')
 
