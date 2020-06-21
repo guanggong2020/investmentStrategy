@@ -50,7 +50,7 @@ def predict(s):
     train_Y = np.mat(train_data.iloc[:, -1].values).T
 
     # 训练次数
-    maxC = 0
+    maxC = 8
     accuracy = 0
     kf = KFold(n_splits=5, shuffle=False, random_state=None)
     for i in range(1, 50):
@@ -85,7 +85,7 @@ def predict(s):
     test_data = build_test_data_set(s)
 
     # 测试集特征样本
-    test_X = np.mat(test_data.iloc[:, :-1].values)
+    test_X = np.mat(test_data.iloc[:, 1:-1].values)
 
     # 测试集标签样本
     test_Y = np.mat(test_data.iloc[:, -1].values).T
