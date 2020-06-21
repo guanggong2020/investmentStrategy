@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-import pandas as pd
-import matplotlib.pyplot as plt
 import datetime as dt
 import os
-import numpy as np
-from matplotlib.font_manager import FontProperties
 
-from backtest.back import calhs300yearprofit
+import matplotlib.pyplot as plt
+import pandas as pd
 
 plt.rcParams['axes.unicode_minus'] = False  # '-'显示为方块的问题
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
