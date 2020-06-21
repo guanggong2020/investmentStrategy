@@ -5,13 +5,17 @@ Author: Trace
 Date: 2020/6/20 19:24
 @Description: None
 """
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from pandas import DataFrame
 from sklearn.model_selection import KFold
 
 from algo.Adaboost import AdaboostTrainDS, AdaClassify
 from util.get_model_param import predict_cross_validation
+
+plt.rcParams['axes.unicode_minus'] = False  # '-'显示为方块的问题
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 中文字体 黑体
 
 """
 构建训练集
@@ -209,7 +213,7 @@ def calhs300yearprofit():
     save_date_yield = DataFrame({'date': [], 'yield': []})
     # 读取沪深300指数数据
     df = pd.read_csv('../data/index_data/399300.csv')
-    data = df[['date', 'open', 'close']][1::20]
+    data = df[['date', 'open', 'close']][242:524:20]
     for dt in data['date']:
         # 获取开盘价和收盘价
         dt_index = data['date'][data['date'] == dt].index[0]
@@ -228,6 +232,28 @@ def calhs300yearprofit():
     return save_date_yield
 
 
-if __name__ == '__main__':
-    back_test()
+"""
+绘制沪深300指数收益率以及策略收益率的比较图
+"""
 
+
+def drawprofitline():
+    # 读取沪深300指数数据
+    # df = pd.read_csv('../data/index_data/399300.csv')
+    # df['date'] = df['date'].str.replace('-','')
+    df = calhs300yearprofit()
+    stockprofit = pd.read_csv('../data/back/result.csv')
+    plt.plot(df['date'], df['yield'], label='基准收益率', color='blue', ls=':', lw=2)
+    plt.plot(df['date'], stockprofit['yield'], label='策略收益率', color='black', ls=':', lw=2)
+    plt.xlabel("时间")
+    plt.ylabel("收益率")
+    plt.xticks(df['date'][::5], rotation=45)
+    plt.axhline(y=0, c='r', ls='--', lw=2)
+    plt.legend()
+    plt.savefig('../image/profit_v6.png')
+    plt.show()
+
+
+if __name__ == '__main__':
+    # back_test()
+    drawprofitline()
