@@ -1,22 +1,121 @@
-# _*_coding:utf-8 _*_
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+"""
+Author: Trace
+Date: 2020/6/20 19:24
+@Description: None
+"""
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from pandas import DataFrame
+from sklearn.model_selection import KFold
 
 from algo.Adaboost import AdaboostTrainDS, AdaClassify
-from draw import drawprofitline
-from util.dataprocess import merge_day_data, split_train_test
-
-
-
+from util.get_model_param import predict_cross_validation
 
 """
-计算年收益率
+构建训练集
 """
 
 
-def calStockYearProfit():
+def build_train_data_set(s):
+    cal_date = pd.read_csv('../data/trade_cal/date_isopen.csv')['cal_date'][::20][s:11 + s]
+    df = pd.read_csv('../data/day_stock_process/' + str(cal_date.iloc[0]) + '.csv')
+    for dt in cal_date[1:]:
+        path = '../data/day_stock_process/' + str(dt) + '.csv'
+        data = pd.read_csv(path)
+        df = pd.concat([df, data])
+    df = df[['open', 'high', 'low', 'close', 'pre_close', 'change', 'pct_chg', 'vol', 'amount', 'label']]
+    df.to_csv('../data/back/train_mix_' + str(s + 1) + '.csv', index=False)
+
+
+"""
+构建测试集
+"""
+
+
+def build_test_data_set(s):
+    cal_date = pd.read_csv('../data/trade_cal/date_isopen.csv')['cal_date'][::20][s + 12:s + 13]
+    df = pd.read_csv('../data/day_stock_process/' + str(cal_date.iloc[0]) + '.csv')
+    return df
+
+
+def predict(s):
+    # 获取训练数据集
+    train_data = pd.read_csv('../data/back/train_mix_' + str(s + 1) + '.csv')
+    # 训练集特征样本
+    train_X = np.mat(train_data.iloc[:, :-1].values)
+
+    # 训练集标签样本
+    train_Y = np.mat(train_data.iloc[:, -1].values).T
+
+    # 训练次数
+    maxC = 0
+    accuracy = 0
+    kf = KFold(n_splits=5, shuffle=False, random_state=None)
+    for i in range(1, 50):
+        for train_index, test_index in kf.split(train_data):
+            test_acc = predict_cross_validation(train_data.iloc[train_index], train_data.iloc[test_index], i)
+            if accuracy < test_acc:
+                accuracy = test_acc
+                maxC = i
+    print(f'弱分类器个数：{maxC}')
+    # 训练得到弱分类器信息
+    weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC)
+
+    # 使用弱分类器对特征矩阵进行分类
+    predictions, aggClass = AdaClassify(train_X, weakClass)
+
+    # 计算训练集分类准确率
+    m = train_X.shape[0]
+
+    train_re = 0  # 训练集分正确的样本个数
+    for i in range(m):
+        if predictions[i] == train_Y[i]:
+            train_re += 1
+    train_acc = train_re / m
+
+    # print(f'训练集准确率为{train_acc}')
+
+    """
+    利用上面训练得到的分类器对新的样本数据集进行预测分类
+    """
+
+    # 获取测试数据集
+    test_data = build_test_data_set(s)
+
+    # 测试集特征样本
+    test_X = np.mat(test_data.iloc[:, :-1].values)
+
+    # 测试集标签样本
+    test_Y = np.mat(test_data.iloc[:, -1].values).T
+
+    # 使用弱分类器对特征矩阵进行分类
+    predictions, aggClass = AdaClassify(test_X, weakClass)
+
+    # 计算测试集分类准确率
+    test_re = 0
+    n = test_X.shape[0]
+    for i in range(n):
+        if predictions[i] == test_Y[i]:
+            test_re += 1
+    test_acc = test_re / n
+    # print(f'测试集准确率为{test_acc}')
+
+    test_data['prediction'] = predictions
+    test_data['aggClass'] = aggClass
+    # 按分类结果降序排序
+    test_data.sort_values(by='prediction', ascending=False, inplace=True)
+    # 按分类的累计类别估计值降序排序
+    test_data.sort_values(by='aggClass', ascending=False, inplace=True)
+    # 获取前50支股票
+    recommend_stock = test_data.head(50)['ts_code']
+    return recommend_stock
+
+
+def back_test():
+    # for i in range(15):
+    #     build_train_data_set(i)
     # 起始资金1000万
     capital_base = 10000000
     # 买卖后的资金
@@ -25,47 +124,12 @@ def calStockYearProfit():
     keepstock = DataFrame({'code': [], 'number': [], 'price': []})
     # 存储日期和收益
     save_date_yield = DataFrame({'date': [], 'yield': []})
-    # 读取交易日期
-    cal_date = pd.read_csv('../data/trade_cal/trade_cal_sse.csv')
-    # 以20个交易日为时间间隔
-    cal_date = cal_date[cal_date.is_open == 1]['cal_date'][1::20]
-    # 以2018-01-02的数据为训练样本训练得到分类器
-    # 获取训练数据集（20180102.csv）
-    train_data = pd.read_csv('../data/back/20180102.csv')[['open', 'high', 'low', 'close',
-                                                           'pre_close', 'change', 'pct_chg', 'vol',
-                                                           'amount',
-                                                           'label']]
+    for s in range(15):
+        recommend_stock = predict(s)
+        cal_date = pd.read_csv('../data/trade_cal/date_isopen.csv')['cal_date'][::20][s + 12:s + 13]
+        test_data = pd.read_csv('../data/day_stock_process/' + str(cal_date.iloc[0]) + '.csv')
+        dcode = test_data['ts_code']
 
-    # 打乱数据集
-    num = train_data.shape[0]
-    data_index = np.arange(num)
-    np.random.shuffle(data_index)
-    train_data = train_data.iloc[data_index]
-    # 切割数据集获得训练集和测试集的特征矩阵和标签矩阵(训练集：测试集=0.8:0.2)
-    train_X, train_Y, test_X, test_Y = split_train_test(train_data)
-    # 训练得到弱分类器信息
-    weakClass, aggClass = AdaboostTrainDS(train_X, train_Y, maxC=15)
-    for dt in cal_date:
-        path = '../data/back/' + str(dt) + '.csv'
-        df = pd.read_csv(path)[['ts_code', 'open', 'high', 'low', 'close',
-                                'pre_close', 'change', 'pct_chg', 'vol',
-                                'amount',
-                                ]]
-        # 测试集特征样本
-        test_X = np.mat(df.iloc[:, 1:].values)
-        # 使用弱分类器对特征矩阵进行分类
-        predictions, aggClass = AdaClassify(test_X, weakClass)
-        df['prediction'] = predictions
-        df['aggClass'] = aggClass
-        # 按分类结果降序排序
-        df.sort_values(by='prediction', ascending=False, inplace=True)
-        # 按分类的累计类别估计值降序排序
-        df.sort_values(by='aggClass', ascending=False, inplace=True)
-        df = df.dropna()
-        # 获取前50支股票
-        recommend_stock = df.head(50)['ts_code']
-        # print(df.head(5)[['ts_code','open']])
-        dcode = df['ts_code']
         # ------------------- 卖出股票-------------------------
         if not keepstock.empty:
             for stock in keepstock['code'].values:
@@ -76,13 +140,12 @@ def calStockYearProfit():
                     # 获取股票价格
                     if stock in dcode:
                         name_index = dcode[dcode == stock].index[0]
-                        price = df['close'][name_index]
+                        price = test_data['close'][name_index]
                     else:
                         price_index = keepstock.loc[(keepstock['code'] == stock)].index[0]
                         price = keepstock['price'][price_index]
                     # 计算剩余资金
                     capital_change += number * price
-
                     # 删除股票
                     keepstock = keepstock.drop(stock_index)
         # ------------------- 买入股票-------------------------
@@ -90,17 +153,18 @@ def calStockYearProfit():
         if keepstock.empty:
             for stock in recommend_stock:
                 name_index = dcode[dcode == stock].index[0]
-                price = df['open'][name_index]
+                price = test_data['open'].iloc[name_index]
                 # 买入
                 capital_change -= 100000
                 # 计算能买多少股
                 num = int(100000 / price)
                 i += 1
                 keepstock = keepstock.append({'code': stock, 'number': num, 'price': price}, ignore_index=True)
+
         else:
             for stock in recommend_stock:
                 name_index = dcode[dcode == stock].index[0]
-                price = df['open'][name_index]
+                price = test_data['open'][name_index]
                 if stock not in keepstock['code'].values:
                     # 买入
                     capital_change -= 100000
@@ -115,7 +179,7 @@ def calStockYearProfit():
                 # 股票价格
                 if stock in dcode:
                     name_index = dcode[dcode == stock].index[0]
-                    price = df['close'][name_index]
+                    price = test_data['close'][name_index]
                 else:
                     price_index = keepstock.loc[(keepstock['code'].values == stock)].index[0]
                     price = keepstock['price'][price_index]
@@ -126,8 +190,8 @@ def calStockYearProfit():
         rate = np.round((capital_change - capital_base) / capital_base, 2)
         # rate = (capital_change - capital_base) / capital_base
         capital_base = capital_change
-        save_date_yield = save_date_yield.append({'date': str(dt), 'yield': rate}, ignore_index=True)
-    return save_date_yield
+        save_date_yield = save_date_yield.append({'date': str(cal_date.iloc[0]), 'yield': rate}, ignore_index=True)
+    save_date_yield.to_csv("../data/back/result.csv")
 
 
 """
@@ -165,6 +229,5 @@ def calhs300yearprofit():
 
 
 if __name__ == '__main__':
-    # df = calhs300yearprofit()
-    # print(df)
-    drawprofitline()
+    back_test()
+

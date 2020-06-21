@@ -1,24 +1,21 @@
 # _*_ coding:utf-8_*_
 
 import pandas as pd
-import numpy as np
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import minmax_scale
 
 from algo.Adaboost import *
-
-from sklearn.model_selection import KFold
-
 from util.data_utils import split_train_test
 
 """
 获取弱分类器个数从1增加到200的过程中训练集和测试集的准确率
 """
 
-# 获取训练数据集（20190301.csv）
+# 获取训练数据集
 train_data = pd.read_csv('../data/train_test_set/train_mix.csv')[['open', 'high', 'low', 'close',
-                                                                    'pre_close', 'change', 'pct_chg', 'vol',
-                                                                    'amount',
-                                                                    'label']]
+                                                                  'pre_close', 'change', 'pct_chg', 'vol',
+                                                                  'amount',
+                                                                  'label']]
 
 price_feature = ['open', 'high', 'low', 'close', 'pre_close']
 for feature in price_feature:
@@ -69,8 +66,8 @@ def reCal():
     test_accuracy = []
     for i in range(1, 201):
         train_acc, test_acc = calAcc(train_data, i)
-        train_accuracy.append(round(train_acc*100,2))
-        test_accuracy.append(round(test_acc*100,2))
+        train_accuracy.append(round(train_acc * 100, 2))
+        test_accuracy.append(round(test_acc * 100, 2))
     return train_accuracy, test_accuracy
 
 
@@ -116,7 +113,7 @@ def cross_validation():
             score = []
             test_acc = predict_cross_validation(train_data.iloc[train_index], train_data.iloc[test_index], i)
             score.append(test_acc)
-        scores.append(round(np.mean(score)*100,2))
+        scores.append(round(np.mean(score) * 100, 2))
     return scores
 
 
@@ -130,4 +127,3 @@ if __name__ == '__main__':
     scores = cross_validation()
     df = pd.DataFrame({'5折交叉验证准确率': scores, '训练准确率': train_accuracy, '测试准确率': test_accuracy})
     df.to_csv('../data/accuracy/accuracy_v7.csv')
-

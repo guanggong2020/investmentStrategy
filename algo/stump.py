@@ -1,8 +1,6 @@
 # _*_coding:utf-8_*_
 import numpy as np
 
-
-
 """
 单层决策树分类函数
     通过阈值比较对数据进行分类
@@ -16,7 +14,7 @@ import numpy as np
 
 def stumpClassify(dataMatrix, dimen, threshVal, threshIneq):
     retArray = np.ones((dataMatrix.shape[0], 1))  # 将retArray全部初始化为1
-    if threshIneq == 'lt':     # 根据阈值和不等号将满足要求的都设为-1
+    if threshIneq == 'lt':  # 根据阈值和不等号将满足要求的都设为-1
         retArray[dataMatrix[:, dimen] <= threshVal] = -1  # 如果小于阈值,则赋值为-1
     else:
         retArray[dataMatrix[:, dimen] > threshVal] = -1  # 如果大于阈值,则赋值为-1
@@ -56,7 +54,7 @@ def buildStump(xMat, yMat, D):
                 err = np.mat(np.ones((m, 1)))  # 初始化误差矩阵，先假设所有的结果都是错的（标记为1）
                 err[predictedVals == yMat] = 0  # 分类正确的,赋值为0
                 eca = D.T * err  # 计算误差
-                # print(f'切分特征: {i}, 阈值:{np.round(Q,2)}, 标志:{S}, 权重误差:{np.round(eca,3)}')
+                # print(f'切分特征: {i}, 阈值:{np.round(Q, 2)}, 标志:{S}, 权重误差:{np.round(eca, 3)}')
                 if eca < minE:  # 找到误差最小的分类方式
                     minE = eca
                     bestClas = predictedVals.copy()

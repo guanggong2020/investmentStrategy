@@ -10,9 +10,7 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 
 from backtest.backtest import calStockYearProfit, drawprofitline
-from draw import draw_hs300_index
 from util.data_utils import download_all_stock, get_hs300_data, update_stock_data
-from util.dataprocess import mark_stock_yield, merge_day_data, download_time_set, mark_hs300_yield
 
 pro = ts.pro_api('769b6990fd248e065e95887933ea517ae21e8dacdbd24bc0d1cf673a')
 """

@@ -7,9 +7,24 @@ from util.data_utils import *
 
 args = Arg()
 
+
+def mark_stock_yield():
+    """
+    :return: 标注股票未来20日的收益率,并存入文件中
+    """
+    pool = pd.read_csv('../data/stock_list/stock_basic.csv')
+    for code in pool.ts_code:
+        df = pd.read_csv('../data/stock_basic/' + code + '.csv')
+        m = df.shape[0]
+        df['yield'] = np.zeros((m, 1))
+        df['yield'] = np.round((df['close'].shift(-20) - df['close']) / df['close'], 2)
+        if not os.path.exists('../data/mark_yield/'):
+            os.makedirs('../data/mark_yield/')
+        df.to_csv('../data/mark_yield/' + code + '.csv', index=0)
+
+
 """
-从已下载的数据中获取指定时间点的股票数据，并合并成一个dataframe
-添加标签
+对标注收益率的股票数据按照日期进行合并，去除中间50%的样本数据，合并成一个DataFrame
 """
 
 
@@ -54,21 +69,6 @@ def get_data_by_date():
         df.to_csv(path)
 
 
-def mark_stock_yield():
-    """
-    :return: 标注股票未来20日的收益率,并存入文件中
-    """
-    pool = pd.read_csv('../data/stock_list/stock_basic.csv')
-    for code in pool.ts_code:
-        df = pd.read_csv('../data/stock_basic/' + code + '.csv')
-        m = df.shape[0]
-        df['yield'] = np.zeros((m, 1))
-        df['yield'] = np.round((df['close'].shift(-20) - df['close']) / df['close'], 2)
-        if not os.path.exists('../data/mark_yield/'):
-            os.makedirs('../data/mark_yield/')
-        df.to_csv('../data/mark_yield/' + code + '.csv', index=0)
-
-
 def data_preprocessing():
     """
     :return: 数据预处理
@@ -94,11 +94,32 @@ def data_preprocessing():
         # for feature in price_feature:
         #     # 数据归一化
         #     df[feature] = minmax_scale(df[feature])
-        #     df = df[['open', 'high', 'low', 'close',
-        #              'pre_close', 'change', 'pct_chg', 'vol',
-        #              'amount',
-        #              'label']]
+        df = df[['ts_code','open', 'high', 'low', 'close', 'pre_close', 'change', 'pct_chg', 'vol', 'amount', 'label']]
         df.to_csv('../data/day_stock_process/' + str(dt) + '.csv', index=False)
+
+    """
+    构建回测测试集
+    """
+    def build_test_set():
+        cal_date = pd.read_csv("../data/trade_cal/date_test.csv")['cal_date']
+        for dt in cal_date:
+            df = merge_day_data(str(dt))
+            v_features = ['vol', 'amount']
+            for feature in v_features:
+                # 取对数
+                df[feature] = df[feature].apply(lambda x: math.log(x))
+                # 中位数去极值
+                df[feature] = filter_extreme_MAD(df[feature], 5)
+                # 标准化
+                df[feature] = standardize_series(df[feature])
+            price_feature = ['open', 'high', 'low', 'close', 'pre_close']
+            for feature in price_feature:
+                # 数据归一化
+                df[feature] = minmax_scale(df[feature])
+            df = df[
+                ['ts_code', 'open', 'high', 'low', 'close', 'pre_close', 'change', 'pct_chg', 'vol', 'amount', 'label']]
+            path = '../data/back/' + str(dt) + '.csv'
+            df.to_csv(path)
 
 
 if __name__ == '__main__':
@@ -106,4 +127,5 @@ if __name__ == '__main__':
     # mark_stock_yield()
     # 按日期合并股票数据
     # get_data_by_date()
+    # 数据预处理
     data_preprocessing()

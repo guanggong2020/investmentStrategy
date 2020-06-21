@@ -45,7 +45,7 @@ def AdaboostTrainDS(xMat, yMat, maxC=40):
 
 
 """
-Adaboost算法分类函数
+AdaBoost算法分类函数
     多个弱分类器的结果以其对应的alpha值作为权重，加权求和得到最后的结果
 参数：
     data：待分类样本
